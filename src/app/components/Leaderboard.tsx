@@ -9,8 +9,6 @@ interface Player {
 }
 
 function getPlayerDisplay(id: string) {
-  // When API is updated, this will use real names.
-  // For now, generate readable names from the hex ID.
   const firstNames = [
     "Marcus", "Leo", "Kai", "Andre", "Diego",
     "Riku", "Mateo", "Noel", "Sven", "Tomas",
@@ -19,45 +17,144 @@ function getPlayerDisplay(id: string) {
     "Silva", "Muller", "Tanaka", "Costa", "Rivera",
     "Nakamura", "Santos", "Berg", "Reyes", "Torres",
   ];
-
   const idx1 = parseInt(id.slice(0, 2), 16) % firstNames.length;
   const idx2 = parseInt(id.slice(2, 4), 16) % lastNames.length;
-
-  return {
-    firstName: firstNames[idx1],
-    lastName: lastNames[idx2],
-    shortId: id.slice(0, 8),
-  };
+  return { firstName: firstNames[idx1], lastName: lastNames[idx2] };
 }
 
-function getAvatarGradient(id: string) {
-  const gradients = [
-    "from-emerald-600 to-emerald-800",
-    "from-blue-600 to-blue-800",
-    "from-amber-600 to-amber-800",
-    "from-rose-600 to-rose-800",
-    "from-violet-600 to-violet-800",
-    "from-cyan-600 to-cyan-800",
-    "from-orange-600 to-orange-800",
-    "from-teal-600 to-teal-800",
-    "from-indigo-600 to-indigo-800",
-    "from-pink-600 to-pink-800",
+function getAvatarColors(id: string) {
+  const pairs = [
+    { ring: "#00e5ff", bg: "#e0f7fa" },
+    { ring: "#7c4dff", bg: "#ede7f6" },
+    { ring: "#ff6d00", bg: "#fff3e0" },
+    { ring: "#00e676", bg: "#e8f5e9" },
+    { ring: "#ff1744", bg: "#fce4ec" },
+    { ring: "#ffea00", bg: "#fffde7" },
+    { ring: "#00b0ff", bg: "#e1f5fe" },
+    { ring: "#d500f9", bg: "#f3e5f5" },
+    { ring: "#1de9b6", bg: "#e0f2f1" },
+    { ring: "#ff9100", bg: "#fff8e1" },
   ];
-  return gradients[parseInt(id.slice(0, 2), 16) % gradients.length];
+  return pairs[parseInt(id.slice(0, 2), 16) % pairs.length];
+}
+
+function Avatar({
+  id,
+  size = "md",
+}: {
+  id: string;
+  size?: "sm" | "md" | "lg" | "xl";
+}) {
+  const display = getPlayerDisplay(id);
+  const colors = getAvatarColors(id);
+  const dims = {
+    sm: "w-10 h-10",
+    md: "w-12 h-12",
+    lg: "w-20 h-20 sm:w-24 sm:h-24",
+    xl: "w-28 h-28 sm:w-36 sm:h-36",
+  };
+  const textSize = {
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-xl sm:text-2xl",
+    xl: "text-3xl sm:text-4xl",
+  };
+  const ringWidth = {
+    sm: "3px",
+    md: "3px",
+    lg: "4px",
+    xl: "5px",
+  };
+
+  return (
+    <div
+      className={`${dims[size]} rounded-full flex items-center justify-center flex-shrink-0 relative`}
+      style={{
+        background: colors.bg,
+        border: `${ringWidth[size]} solid ${colors.ring}`,
+        boxShadow: `0 0 0 2px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.1)`,
+      }}
+    >
+      <span className={`font-extrabold ${textSize[size]}`} style={{ color: colors.ring }}>
+        {display.firstName[0]}
+        {display.lastName[0]}
+      </span>
+    </div>
+  );
+}
+
+function Podium({ top3 }: { top3: Player[] }) {
+  if (top3.length < 3) return null;
+
+  const podiumOrder = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
+  const podiumSizes: ("lg" | "xl" | "lg")[] = ["lg", "xl", "lg"];
+  const podiumLabels = ["2nd", "1st", "3rd"];
+  const podiumHeights = ["h-20 sm:h-24", "h-28 sm:h-32", "h-16 sm:h-20"];
+  const podiumColors = ["bg-gray-300", "bg-[var(--gold)]", "bg-amber-600"];
+
+  return (
+    <div className="flex items-end justify-center gap-3 sm:gap-6 mb-8 sm:mb-12 pt-4">
+      {podiumOrder.map((p, i) => {
+        const display = getPlayerDisplay(p.player);
+        const isFirst = i === 1;
+        return (
+          <div key={p.player} className="flex flex-col items-center">
+            {/* Crown for #1 */}
+            {isFirst && (
+              <div className="text-3xl sm:text-4xl mb-1 animate-bounce" style={{ animationDuration: "2s" }}>
+                👑
+              </div>
+            )}
+            {/* Avatar */}
+            <Avatar id={p.player} size={isFirst ? "xl" : "lg"} />
+            {/* Name */}
+            <p className={`mt-2 font-extrabold text-[var(--bg-dark)] ${isFirst ? "text-base sm:text-lg" : "text-sm"}`}>
+              {display.firstName}
+            </p>
+            {/* Wins */}
+            <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+              {p.wins.toLocaleString()} wins
+            </p>
+            {/* Podium block */}
+            <div
+              className={`mt-2 w-20 sm:w-28 ${podiumHeights[i]} ${podiumColors[i]} rounded-t-xl flex items-start justify-center pt-2 sm:pt-3`}
+            >
+              <span className="text-lg sm:text-xl font-black text-[var(--bg-dark)] opacity-80">
+                {podiumLabels[i]}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function getRowStyle(rank: number) {
+  if (rank === 1)
+    return "bg-[var(--gold)] text-[var(--text-dark)]";
+  if (rank === 2)
+    return "bg-[var(--silver)] text-[var(--text-dark)]";
+  if (rank === 3)
+    return "bg-[var(--orange-row)] text-white";
+  return "bg-transparent text-white";
 }
 
 export default function Leaderboard({ players }: { players: Player[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const top3 = players.slice(0, 3);
+  const rest = players.slice(3);
+
   return (
     <div className="w-full">
       {/* Refresh */}
-      <div className="flex items-center justify-end mb-3 px-1">
+      <div className="flex items-center justify-end mb-4 px-1">
         <button
           onClick={() => startTransition(() => router.refresh())}
           disabled={isPending}
-          className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] active:scale-95 transition-all cursor-pointer px-3 py-2 -mr-2 rounded-lg"
+          className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-dark)] active:scale-95 transition-all cursor-pointer px-3 py-2 -mr-2 rounded-lg"
         >
           <svg
             className={`w-3.5 h-3.5 ${isPending ? "animate-spin" : ""}`}
@@ -76,127 +173,85 @@ export default function Leaderboard({ players }: { players: Player[] }) {
         </button>
       </div>
 
-      {/* Player Cards */}
-      <div className="flex flex-col gap-2 sm:gap-3">
-        {players.map((p, i) => {
-          const rank = i + 1;
-          const display = getPlayerDisplay(p.player);
-          const gradient = getAvatarGradient(p.player);
+      {/* Podium - Top 3 */}
+      <Podium top3={top3} />
 
-          return (
-            <div
-              key={p.player}
-              className="bg-[var(--bg-card)] rounded-xl sm:rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow duration-200"
-            >
-              {/* Desktop */}
-              <div className="hidden sm:flex items-center px-5 py-4 lg:px-6 lg:py-5 gap-4">
-                {/* Rank */}
-                <div className="w-16 flex items-center gap-1.5 flex-shrink-0">
-                  <svg
-                    className="w-4 h-4 text-[var(--text-muted)]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
+      {/* Ranked List */}
+      <div className="rounded-3xl bg-[var(--bg-dark)] p-4 sm:p-6 shadow-xl">
+        {/* Top 3 in list */}
+        <div className="flex flex-col gap-2 sm:gap-3 mb-3">
+          {top3.map((p, i) => {
+            const rank = i + 1;
+            const display = getPlayerDisplay(p.player);
+            const rowStyle = getRowStyle(rank);
+
+            return (
+              <div
+                key={p.player}
+                className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full ${rowStyle} transition-transform hover:scale-[1.01]`}
+              >
+                {/* Rank indicator */}
+                <div className="flex items-center gap-1 w-8 sm:w-10 flex-shrink-0">
+                  <svg className="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
                   </svg>
-                  <span className="text-xl font-bold text-[var(--text)]">
-                    {rank}
-                  </span>
+                  <span className="text-base sm:text-lg font-extrabold">{rank}</span>
                 </div>
 
                 {/* Avatar */}
-                <div
-                  className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
-                >
-                  <span className="text-white text-lg lg:text-xl font-bold">
-                    {display.firstName[0]}
-                    {display.lastName[0]}
-                  </span>
-                </div>
+                <Avatar id={p.player} size="sm" />
 
-                {/* Player Info */}
-                <div className="flex-1 min-w-0 pl-1">
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {display.firstName}
-                  </p>
-                  <p className="text-xl lg:text-2xl font-extrabold text-[var(--text)] tracking-tight leading-tight">
-                    {display.lastName}
-                  </p>
-                  <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
-                    {display.shortId}
-                  </p>
-                </div>
+                {/* Name */}
+                <span className="flex-1 text-base sm:text-lg font-bold truncate">
+                  {display.firstName}
+                </span>
 
-                {/* Wins */}
-                <div className="flex-shrink-0">
-                  <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-full bg-[var(--green-bg)] flex items-center justify-center">
-                    <span className="text-white text-lg lg:text-xl font-extrabold tabular-nums">
-                      {p.wins}
-                    </span>
-                  </div>
-                </div>
+                {/* Points */}
+                <span className="text-sm sm:text-base font-bold opacity-80 flex-shrink-0">
+                  {p.wins.toLocaleString()}{" "}
+                  <span className="text-xs font-normal">pts.</span>
+                </span>
               </div>
+            );
+          })}
+        </div>
 
-              {/* Mobile */}
-              <div className="sm:hidden flex items-center px-3.5 py-3.5 gap-3">
-                {/* Rank */}
-                <div className="w-10 flex items-center gap-1 flex-shrink-0">
-                  <svg
-                    className="w-3 h-3 text-[var(--text-muted)]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
+        {/* Remaining players */}
+        <div className="flex flex-col gap-2 sm:gap-2.5">
+          {rest.map((p, i) => {
+            const rank = i + 4;
+            const display = getPlayerDisplay(p.player);
+
+            return (
+              <div
+                key={p.player}
+                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full transition-colors hover:bg-white/5"
+              >
+                {/* Rank indicator */}
+                <div className="flex items-center gap-1 w-8 sm:w-10 flex-shrink-0">
+                  <svg className="w-3.5 h-3.5 text-[var(--green-accent)] opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
                   </svg>
-                  <span className="text-base font-bold text-[var(--text)]">
-                    {rank}
-                  </span>
+                  <span className="text-base sm:text-lg font-extrabold text-white">{rank}</span>
                 </div>
 
                 {/* Avatar */}
-                <div
-                  className={`w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-sm`}
-                >
-                  <span className="text-white text-sm font-bold">
-                    {display.firstName[0]}
-                    {display.lastName[0]}
-                  </span>
-                </div>
+                <Avatar id={p.player} size="sm" />
 
-                {/* Player Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-[var(--text-secondary)] leading-tight">
-                    {display.firstName}
-                  </p>
-                  <p className="text-base font-extrabold text-[var(--text)] tracking-tight leading-tight">
-                    {display.lastName}
-                  </p>
-                </div>
+                {/* Name */}
+                <span className="flex-1 text-base sm:text-lg font-bold text-white truncate">
+                  {display.firstName}
+                </span>
 
-                {/* Wins */}
-                <div className="flex-shrink-0">
-                  <div className="w-11 h-11 rounded-full bg-[var(--green-bg)] flex items-center justify-center">
-                    <span className="text-white text-sm font-extrabold tabular-nums">
-                      {p.wins}
-                    </span>
-                  </div>
-                </div>
+                {/* Points */}
+                <span className="text-sm sm:text-base text-[var(--text-muted)] font-bold flex-shrink-0">
+                  {p.wins.toLocaleString()}{" "}
+                  <span className="text-xs font-normal">pts.</span>
+                </span>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

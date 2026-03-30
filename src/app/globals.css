@@ -1,18 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Bangers&display=swap');
 @import "tailwindcss";
 
 :root {
-  --bg: #f0efe9;
+  --bg: #f5f5f5;
+  --bg-dark: #312244;
   --bg-card: #ffffff;
-  --bg-header: #ffffff;
   --text: #1a1a1a;
-  --text-secondary: #555555;
-  --text-muted: #999999;
-  --border: #e8e7e2;
-  --green: #1a472a;
-  --green-light: #2d6a3f;
-  --green-bg: #1a472a;
-  --score-bg: #e8e7e2;
-  --score-text: #1a1a1a;
+  --text-dark: #312244;
+  --text-muted: rgba(49, 34, 68, 0.7);
+  --text-white: #ffffff;
+  --cyan: #00e5ff;
+  --cyan-dark: #00b8d4;
+  --purple: #7c4dff;
+  --purple-dark: #4d1f8a;
+  --green-accent: #4cdf8a;
+  --gold: #ffca28;
+  --silver: #e0e0e0;
+  --bronze: #f59e0b;
+  --orange-row: #f97316;
 }
 
 * {
@@ -29,8 +34,7 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -42,22 +46,11 @@ body {
 }
 
 @media all and (display-mode: standalone) {
-  body {
-    padding-top: 0;
-  }
-  .pwa-header {
-    padding-top: env(safe-area-inset-top);
-  }
+  body { padding-top: 0; }
+  .pwa-header { padding-top: env(safe-area-inset-top); }
 }
 
-button,
-a,
-[role="button"] {
+button, a, [role="button"] {
   min-height: 44px;
   min-width: 44px;
-}
-
-p, span, h1, h2, h3 {
-  overflow-wrap: break-word;
-  word-break: break-word;
 }

@@ -12,11 +12,7 @@ async function getLeaderboard(): Promise<Player[]> {
     "https://leaderboards-d2dwf8cwhwfuegde.eastus-01.azurewebsites.net/api/GetLeaderboard",
     { cache: "no-store" }
   );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch leaderboard");
-  }
-
+  if (!res.ok) throw new Error("Failed to fetch leaderboard");
   return res.json();
 }
 
@@ -25,66 +21,73 @@ export default async function Home() {
   const sorted = [...players].sort((a, b) => b.wins - a.wins);
 
   return (
-    <main className="min-h-screen bg-[var(--bg)]">
-      {/* Top Nav Bar */}
-      <nav className="pwa-header bg-white border-b border-[var(--border)]">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
-          <div className="flex items-center gap-3">
-            <svg viewBox="0 0 36 36" className="w-8 h-8 sm:w-9 sm:h-9">
-              <rect width="36" height="36" rx="8" fill="var(--green)" />
-              <text
-                x="50%"
-                y="54%"
-                fontFamily="-apple-system, sans-serif"
-                fontSize="14"
-                fontWeight="800"
-                fill="white"
-                textAnchor="middle"
-                dominantBaseline="middle"
+    <main className="min-h-screen bg-[var(--bg)] relative overflow-hidden">
+      {/* Background decorations - green diagonal streaks */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -bottom-20 -left-20 w-[500px] h-[600px] bg-[var(--green-accent)] opacity-20 rotate-[-25deg] rounded-3xl" />
+        <div className="absolute -bottom-40 left-10 w-[200px] h-[700px] bg-[var(--green-accent)] opacity-15 rotate-[-25deg] rounded-3xl" />
+        {/* Dot pattern */}
+        <svg className="absolute left-4 top-[30%] opacity-30" width="80" height="120">
+          {Array.from({ length: 8 }).map((_, row) =>
+            Array.from({ length: 5 }).map((_, col) => (
+              <circle
+                key={`${row}-${col}`}
+                cx={col * 14 + 7}
+                cy={row * 14 + 7}
+                r="2.5"
+                fill="var(--green-accent)"
+              />
+            ))
+          )}
+        </svg>
+      </div>
+
+      {/* Header / Navbar */}
+      <header className="pwa-header relative z-10 bg-white">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex items-center justify-between h-16 sm:h-20">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* FIFA Heroes Logo */}
+            <div className="flex items-center gap-1.5">
+              <div className="bg-[var(--bg-dark)] rounded-md px-1.5 py-0.5">
+                <span className="text-white text-[10px] sm:text-xs font-black tracking-tight">FIFA</span>
+              </div>
+              <span
+                className="text-xl sm:text-2xl font-black italic text-[var(--bg-dark)] tracking-tight"
+                style={{ fontFamily: "'Bangers', cursive" }}
               >
-                FH
-              </text>
-            </svg>
-            <span className="text-base sm:text-lg font-bold tracking-tight text-[var(--text)]">
-              FIFA HEROES
-            </span>
+                HEROES
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--green-accent)] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--green-accent)]" />
             </span>
-            <span className="text-[11px] sm:text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+            <span className="text-[11px] sm:text-xs font-bold text-[var(--green-accent)] uppercase tracking-wider">
               Live
             </span>
           </div>
         </div>
-      </nav>
+        {/* Cyan accent line */}
+        <div className="h-1 bg-gradient-to-r from-[var(--cyan)] to-[var(--cyan-dark)]" />
+      </header>
 
-      {/* Column Headers */}
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 mt-6 sm:mt-10">
-        <div className="flex items-center px-2 sm:px-4 pb-3 sm:pb-4 border-b border-[var(--border)]">
-          <span className="w-16 sm:w-20 text-sm sm:text-base font-semibold text-[var(--text)]">
-            Pos
-          </span>
-          <span className="flex-1 text-sm sm:text-base font-semibold text-[var(--text)] pl-2 sm:pl-16">
-            Player
-          </span>
-          <span className="text-sm sm:text-base font-semibold text-[var(--text)] w-20 text-right">
-            Wins
-          </span>
-        </div>
+      {/* Title */}
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 mt-6 sm:mt-8">
+        <h1
+          className="text-3xl sm:text-4xl md:text-5xl font-black italic text-[var(--bg-dark)] tracking-tight"
+          style={{ fontFamily: "'Bangers', cursive", letterSpacing: "1px" }}
+        >
+          LEADERBOARD
+        </h1>
+        <div className="mt-1 h-1 w-32 sm:w-40 bg-gradient-to-r from-[var(--cyan)] to-[var(--cyan-dark)] rounded-full" />
       </div>
 
-      {/* Leaderboard Cards */}
-      <section className="mx-auto max-w-5xl px-4 sm:px-6 mt-3 sm:mt-4">
+      {/* Leaderboard */}
+      <section className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 mt-8 sm:mt-10 pb-16">
         <Leaderboard players={sorted} />
       </section>
-
-      {/* Footer */}
-      <footer className="mt-12 sm:mt-16 mb-6 sm:mb-8 text-center text-[11px] sm:text-xs text-[var(--text-muted)] px-4">
-        <p>FIFA Heroes Leaderboard &middot; {sorted.length} players</p>
-      </footer>
     </main>
   );
 }
