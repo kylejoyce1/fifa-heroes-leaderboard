@@ -1,21 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #ffffff;
-  --bg-subtle: #f8f9fa;
-  --bg-header: #0c1220;
-  --bg-header-accent: #1a2540;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --text-light: #9ca3af;
-  --border: #e5e7eb;
-  --border-light: #f3f4f6;
-  --gold: #d4a017;
-  --silver: #71717a;
-  --bronze: #b45309;
-  --accent: #2563eb;
-  --accent-light: #dbeafe;
-  --green: #059669;
+  --bg: #f0efe9;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  --text: #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted: #999999;
+  --border: #e8e7e2;
+  --green: #1a472a;
+  --green-light: #2d6a3f;
+  --green-bg: #1a472a;
+  --score-bg: #e8e7e2;
+  --score-text: #1a1a1a;
 }
 
 * {
@@ -37,7 +34,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
-  /* Safe area insets for notched phones */
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
@@ -45,7 +41,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Standalone PWA: extend header behind status bar */
 @media all and (display-mode: standalone) {
   body {
     padding-top: 0;
@@ -55,7 +50,6 @@ body {
   }
 }
 
-/* Touch targets minimum 44px */
 button,
 a,
 [role="button"] {
@@ -63,19 +57,7 @@ a,
   min-width: 44px;
 }
 
-/* Prevent text overflow */
-p,
-span,
-h1,
-h2,
-h3 {
+p, span, h1, h2, h3 {
   overflow-wrap: break-word;
   word-break: break-word;
-}
-
-/* Smooth pull-to-refresh feel */
-@supports (-webkit-overflow-scrolling: touch) {
-  html {
-    -webkit-overflow-scrolling: touch;
-  }
 }

@@ -8,31 +8,59 @@ interface Player {
   wins: number;
 }
 
-function formatId(id: string) {
-  return `${id.slice(0, 4)} ${id.slice(4, 8)}`;
+function getPlayerDisplay(id: string) {
+  // When API is updated, this will use real names.
+  // For now, generate readable names from the hex ID.
+  const firstNames = [
+    "Marcus", "Leo", "Kai", "Andre", "Diego",
+    "Riku", "Mateo", "Noel", "Sven", "Tomas",
+  ];
+  const lastNames = [
+    "Silva", "Muller", "Tanaka", "Costa", "Rivera",
+    "Nakamura", "Santos", "Berg", "Reyes", "Torres",
+  ];
+
+  const idx1 = parseInt(id.slice(0, 2), 16) % firstNames.length;
+  const idx2 = parseInt(id.slice(2, 4), 16) % lastNames.length;
+
+  return {
+    firstName: firstNames[idx1],
+    lastName: lastNames[idx2],
+    shortId: id.slice(0, 8),
+  };
 }
 
-function getPlayerName(id: string) {
-  return `Player ${id.slice(0, 6).toUpperCase()}`;
+function getAvatarGradient(id: string) {
+  const gradients = [
+    "from-emerald-600 to-emerald-800",
+    "from-blue-600 to-blue-800",
+    "from-amber-600 to-amber-800",
+    "from-rose-600 to-rose-800",
+    "from-violet-600 to-violet-800",
+    "from-cyan-600 to-cyan-800",
+    "from-orange-600 to-orange-800",
+    "from-teal-600 to-teal-800",
+    "from-indigo-600 to-indigo-800",
+    "from-pink-600 to-pink-800",
+  ];
+  return gradients[parseInt(id.slice(0, 2), 16) % gradients.length];
 }
 
 export default function Leaderboard({ players }: { players: Player[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const leader = players[0]?.wins ?? 1;
-
   return (
     <div className="w-full">
       {/* Refresh */}
-      <div className="flex items-center justify-end mb-3 sm:mb-4 px-1">
+      <div className="flex items-center justify-end mb-3 px-1">
         <button
           onClick={() => startTransition(() => router.refresh())}
           disabled={isPending}
-          className="flex items-center justify-center gap-1.5 text-xs sm:text-sm text-[var(--text-muted)] hover:text-[var(--text)] active:scale-95 transition-all cursor-pointer px-3 py-2 -mr-3 rounded-lg"
+          className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] active:scale-95 transition-all cursor-pointer px-3 py-2 -mr-2 rounded-lg"
         >
           <svg
-            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isPending ? "animate-spin" : ""}`}
+            className={`w-3.5 h-3.5 ${isPending ? "animate-spin" : ""}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -48,138 +76,127 @@ export default function Leaderboard({ players }: { players: Player[] }) {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-white shadow-sm">
-        {/* Desktop/Tablet Header */}
-        <div className="hidden sm:grid grid-cols-[72px_1fr_100px_100px] items-center bg-[var(--bg-header)] text-white px-5 py-3">
-          <span className="text-[11px] font-semibold uppercase tracking-widest opacity-60">
-            Pos
-          </span>
-          <span className="text-[11px] font-semibold uppercase tracking-widest opacity-60">
-            Player
-          </span>
-          <span className="text-[11px] font-semibold uppercase tracking-widest opacity-60 text-right">
-            Rate
-          </span>
-          <span className="text-[11px] font-semibold uppercase tracking-widest opacity-60 text-right">
-            Wins
-          </span>
-        </div>
-
-        {/* Mobile Header */}
-        <div className="sm:hidden flex items-center justify-between bg-[var(--bg-header)] text-white px-4 py-2.5">
-          <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">
-            Player
-          </span>
-          <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">
-            Wins
-          </span>
-        </div>
-
-        {/* Rows */}
+      {/* Player Cards */}
+      <div className="flex flex-col gap-2 sm:gap-3">
         {players.map((p, i) => {
           const rank = i + 1;
-          const winRate = ((p.wins / leader) * 100).toFixed(0);
-          const isTop3 = rank <= 3;
+          const display = getPlayerDisplay(p.player);
+          const gradient = getAvatarGradient(p.player);
 
           return (
-            <div key={p.player}>
-              {/* Desktop/Tablet Row */}
-              <div
-                className={`hidden sm:grid grid-cols-[72px_1fr_100px_100px] items-center px-5 py-3.5 border-b border-[var(--border-light)] transition-colors hover:bg-[var(--bg-subtle)] ${
-                  isTop3 ? "bg-amber-50/40" : ""
-                }`}
-              >
-                <div>
-                  <span
-                    className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
-                      rank === 1
-                        ? "bg-yellow-400 text-yellow-900"
-                        : rank === 2
-                        ? "bg-gray-300 text-gray-700"
-                        : rank === 3
-                        ? "bg-amber-600 text-white"
-                        : "text-[var(--text-muted)]"
-                    }`}
+            <div
+              key={p.player}
+              className="bg-[var(--bg-card)] rounded-xl sm:rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-shadow duration-200"
+            >
+              {/* Desktop */}
+              <div className="hidden sm:flex items-center px-5 py-4 lg:px-6 lg:py-5 gap-4">
+                {/* Rank */}
+                <div className="w-16 flex items-center gap-1.5 flex-shrink-0">
+                  <svg
+                    className="w-4 h-4 text-[var(--text-muted)]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                  <span className="text-xl font-bold text-[var(--text)]">
                     {rank}
                   </span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[var(--text)] truncate">
-                    {getPlayerName(p.player)}
-                  </p>
-                  <p className="text-[11px] text-[var(--text-light)] font-mono mt-0.5">
-                    {formatId(p.player)}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="w-14 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-[var(--accent)] transition-all duration-700"
-                      style={{ width: `${winRate}%` }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-[var(--text-light)] mt-1">
-                    {winRate}%
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-lg font-bold tabular-nums">
-                    {p.wins.toLocaleString()}
-                  </span>
-                </div>
-              </div>
 
-              {/* Mobile Row */}
-              <div
-                className={`sm:hidden flex items-center gap-3 px-4 py-3 border-b border-[var(--border-light)] active:bg-[var(--bg-subtle)] ${
-                  isTop3 ? "bg-amber-50/40" : ""
-                }`}
-              >
-                {/* Rank badge */}
-                <span
-                  className={`flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
-                    rank === 1
-                      ? "bg-yellow-400 text-yellow-900"
-                      : rank === 2
-                      ? "bg-gray-300 text-gray-700"
-                      : rank === 3
-                      ? "bg-amber-600 text-white"
-                      : "text-[var(--text-muted)] bg-gray-50"
-                  }`}
+                {/* Avatar */}
+                <div
+                  className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
                 >
-                  {rank}
-                </span>
+                  <span className="text-white text-lg lg:text-xl font-bold">
+                    {display.firstName[0]}
+                    {display.lastName[0]}
+                  </span>
+                </div>
 
-                {/* Player info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[var(--text)] truncate">
-                    {getPlayerName(p.player)}
+                {/* Player Info */}
+                <div className="flex-1 min-w-0 pl-1">
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {display.firstName}
                   </p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-[var(--text-light)] font-mono">
-                      {formatId(p.player)}
-                    </span>
-                    <span className="text-[10px] text-[var(--text-light)]">
-                      &middot; {winRate}%
-                    </span>
-                  </div>
+                  <p className="text-xl lg:text-2xl font-extrabold text-[var(--text)] tracking-tight leading-tight">
+                    {display.lastName}
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
+                    {display.shortId}
+                  </p>
                 </div>
 
                 {/* Wins */}
-                <span className="flex-shrink-0 text-base font-bold tabular-nums text-[var(--text)]">
-                  {p.wins.toLocaleString()}
-                </span>
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-full bg-[var(--green-bg)] flex items-center justify-center">
+                    <span className="text-white text-lg lg:text-xl font-extrabold tabular-nums">
+                      {p.wins}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile */}
+              <div className="sm:hidden flex items-center px-3.5 py-3.5 gap-3">
+                {/* Rank */}
+                <div className="w-10 flex items-center gap-1 flex-shrink-0">
+                  <svg
+                    className="w-3 h-3 text-[var(--text-muted)]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                  <span className="text-base font-bold text-[var(--text)]">
+                    {rank}
+                  </span>
+                </div>
+
+                {/* Avatar */}
+                <div
+                  className={`w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-sm`}
+                >
+                  <span className="text-white text-sm font-bold">
+                    {display.firstName[0]}
+                    {display.lastName[0]}
+                  </span>
+                </div>
+
+                {/* Player Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-[var(--text-secondary)] leading-tight">
+                    {display.firstName}
+                  </p>
+                  <p className="text-base font-extrabold text-[var(--text)] tracking-tight leading-tight">
+                    {display.lastName}
+                  </p>
+                </div>
+
+                {/* Wins */}
+                <div className="flex-shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-[var(--green-bg)] flex items-center justify-center">
+                    <span className="text-white text-sm font-extrabold tabular-nums">
+                      {p.wins}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
-      </div>
-
-      {/* Footer note */}
-      <div className="mt-3 sm:mt-4 text-center text-[10px] sm:text-xs text-[var(--text-light)]">
-        {players.length} players ranked by total wins
       </div>
     </div>
   );
