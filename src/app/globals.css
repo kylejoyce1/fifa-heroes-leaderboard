@@ -1,17 +1,29 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+}
+
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #1a1a1a;
-  --bg-row-hover: #222222;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --accent: #00d4ff;
-  --accent-gold: #ffd700;
-  --accent-silver: #c0c0c0;
-  --accent-bronze: #cd7f32;
-  --border: #2a2a2a;
+  --bg: #ffffff;
+  --bg-subtle: #f8f9fa;
+  --bg-header: #0c1220;
+  --bg-header-accent: #1a2540;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+  --gold: #d4a017;
+  --silver: #71717a;
+  --bronze: #b45309;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --green: #059669;
 }
 
 * {
@@ -20,12 +32,16 @@
   padding: 0;
 }
 
-html,
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
