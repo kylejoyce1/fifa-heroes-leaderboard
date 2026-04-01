@@ -4,255 +4,170 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 interface Player {
-  player: string;
-  wins: number;
+    player: string;
+    userName: string;
+    country: string;
+    wins: number;
+    losses: number;
+    matches: number;
 }
 
-function getPlayerDisplay(id: string) {
-  const firstNames = [
-    "Marcus", "Leo", "Kai", "Andre", "Diego",
-    "Riku", "Mateo", "Noel", "Sven", "Tomas",
+const avatarColors = [
+  { bg: "#00b3d9", border: "#00e5ff" },
+  { bg: "#a855f7", border: "#bf73ff" },
+  { bg: "#fb923c", border: "#ffb366" },
+  { bg: "#4ade80", border: "#66f099" },
+  { bg: "#f472b6", border: "#ff99cc" },
+  { bg: "#facc15", border: "#ffe64d" },
+  { bg: "#38bdf8", border: "#59d9ff" },
+  { bg: "#e879f9", border: "#f099ff" },
+  { bg: "#2dd4bf", border: "#66f0e0" },
+  { bg: "#fbbf24", border: "#ffd966" },
   ];
-  const lastNames = [
-    "Silva", "Muller", "Tanaka", "Costa", "Rivera",
-    "Nakamura", "Santos", "Berg", "Reyes", "Torres",
-  ];
-  const idx1 = parseInt(id.slice(0, 2), 16) % firstNames.length;
-  const idx2 = parseInt(id.slice(2, 4), 16) % lastNames.length;
-  return { firstName: firstNames[idx1], lastName: lastNames[idx2] };
-}
 
-function getAvatarColors(id: string) {
-  const pairs = [
-    { ring: "#00e5ff", bg: "#e0f7fa" },
-    { ring: "#7c4dff", bg: "#ede7f6" },
-    { ring: "#ff6d00", bg: "#fff3e0" },
-    { ring: "#00e676", bg: "#e8f5e9" },
-    { ring: "#ff1744", bg: "#fce4ec" },
-    { ring: "#ffea00", bg: "#fffde7" },
-    { ring: "#00b0ff", bg: "#e1f5fe" },
-    { ring: "#d500f9", bg: "#f3e5f5" },
-    { ring: "#1de9b6", bg: "#e0f2f1" },
-    { ring: "#ff9100", bg: "#fff8e1" },
-  ];
-  return pairs[parseInt(id.slice(0, 2), 16) % pairs.length];
-}
-
-function Avatar({
-  id,
-  size = "md",
-}: {
-  id: string;
-  size?: "sm" | "md" | "lg" | "xl";
-}) {
-  const display = getPlayerDisplay(id);
-  const colors = getAvatarColors(id);
-  const dims = {
-    sm: "w-10 h-10",
-    md: "w-12 h-12",
-    lg: "w-20 h-20 sm:w-24 sm:h-24",
-    xl: "w-28 h-28 sm:w-36 sm:h-36",
-  };
-  const textSize = {
-    sm: "text-sm",
-    md: "text-base",
-    lg: "text-xl sm:text-2xl",
-    xl: "text-3xl sm:text-4xl",
-  };
-  const ringWidth = {
-    sm: "3px",
-    md: "3px",
-    lg: "4px",
-    xl: "5px",
-  };
-
-  return (
-    <div
-      className={`${dims[size]} rounded-full flex items-center justify-center flex-shrink-0 relative`}
-      style={{
-        background: colors.bg,
-        border: `${ringWidth[size]} solid ${colors.ring}`,
-        boxShadow: `0 0 0 2px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.1)`,
-      }}
-    >
-      <span className={`font-extrabold ${textSize[size]}`} style={{ color: colors.ring }}>
-        {display.firstName[0]}
-        {display.lastName[0]}
-      </span>
-    </div>
-  );
-}
-
-function Podium({ top3 }: { top3: Player[] }) {
-  if (top3.length < 3) return null;
-
-  const podiumOrder = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
-  const podiumSizes: ("lg" | "xl" | "lg")[] = ["lg", "xl", "lg"];
-  const podiumLabels = ["2nd", "1st", "3rd"];
-  const podiumHeights = ["h-20 sm:h-24", "h-28 sm:h-32", "h-16 sm:h-20"];
-  const podiumColors = ["bg-gray-300", "bg-[var(--gold)]", "bg-amber-600"];
-
-  return (
-    <div className="flex items-end justify-center gap-3 sm:gap-6 mb-8 sm:mb-12 pt-4">
-      {podiumOrder.map((p, i) => {
-        const display = getPlayerDisplay(p.player);
-        const isFirst = i === 1;
-        return (
-          <div key={p.player} className="flex flex-col items-center">
-            {/* Crown for #1 */}
-            {isFirst && (
-              <div className="text-3xl sm:text-4xl mb-1 animate-bounce" style={{ animationDuration: "2s" }}>
-                👑
-              </div>
-            )}
-            {/* Avatar */}
-            <Avatar id={p.player} size={isFirst ? "xl" : "lg"} />
-            {/* Name */}
-            <p className={`mt-2 font-extrabold text-[var(--bg-dark)] ${isFirst ? "text-base sm:text-lg" : "text-sm"}`}>
-              {display.firstName}
-            </p>
-            {/* Wins */}
-            <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-              {p.wins.toLocaleString()} wins
-            </p>
-            {/* Podium block */}
-            <div
-              className={`mt-2 w-20 sm:w-28 ${podiumHeights[i]} ${podiumColors[i]} rounded-t-xl flex items-start justify-center pt-2 sm:pt-3`}
-            >
-              <span className="text-lg sm:text-xl font-black text-[var(--bg-dark)] opacity-80">
-                {podiumLabels[i]}
-              </span>
-            </div>
-          </div>
+function Avatar({ id, userName }: { id: string; userName: string }) {
+    const colors = avatarColors[parseInt(id.slice(0, 2), 16) % avatarColors.length];
+    return (
+          <div
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm sm:text-base"
+                  style={{
+                            background: colors.bg,
+                            border: `2.5px solid ${colors.border}`,
+                            color: "#fff",
+                            boxShadow: `0 0 14px ${colors.border}40`,
+                  }}
+                >
+            {userName.slice(0, 2).toUpperCase()}
+          </div>div>
         );
-      })}
-    </div>
-  );
 }
 
-function getRowStyle(rank: number) {
-  if (rank === 1)
-    return "bg-[var(--gold)] text-[var(--text-dark)]";
-  if (rank === 2)
-    return "bg-[var(--silver)] text-[var(--text-dark)]";
-  if (rank === 3)
-    return "bg-[var(--orange-row)] text-white";
-  return "bg-transparent text-white";
+function countryFlag(country: string): string {
+    return String.fromCodePoint(
+          ...Array.from(country.toUpperCase()).map(
+                  (c) => 127462 + c.charCodeAt(0) - 65
+                        )
+        );
 }
+
+const topRankStyles: Record<number, { bg: string; border: string; color: string }> = {
+    1: { bg: "#fffceb", border: "rgba(255,214,0,0.30)", color: "#ffd600" },
+    2: { bg: "#f9fafb", border: "rgba(184,196,207,0.30)", color: "#b8c4cf" },
+    3: { bg: "#fbf5ef", border: "rgba(204,128,51,0.30)", color: "#cc8033" },
+};
 
 export default function Leaderboard({ players }: { players: Player[] }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  const top3 = players.slice(0, 3);
-  const rest = players.slice(3);
-
-  return (
-    <div className="w-full">
-      {/* Refresh */}
-      <div className="flex items-center justify-end mb-4 px-1">
-        <button
-          onClick={() => startTransition(() => router.refresh())}
-          disabled={isPending}
-          className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-dark)] active:scale-95 transition-all cursor-pointer px-3 py-2 -mr-2 rounded-lg"
-        >
-          <svg
-            className={`w-3.5 h-3.5 ${isPending ? "animate-spin" : ""}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          {isPending ? "Updating..." : "Refresh"}
-        </button>
-      </div>
-
-      {/* Podium - Top 3 */}
-      <Podium top3={top3} />
-
-      {/* Ranked List */}
-      <div className="rounded-3xl bg-[var(--bg-dark)] p-4 sm:p-6 shadow-xl">
-        {/* Top 3 in list */}
-        <div className="flex flex-col gap-2 sm:gap-3 mb-3">
-          {top3.map((p, i) => {
-            const rank = i + 1;
-            const display = getPlayerDisplay(p.player);
-            const rowStyle = getRowStyle(rank);
-
-            return (
-              <div
-                key={p.player}
-                className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full ${rowStyle} transition-transform hover:scale-[1.01]`}
-              >
-                {/* Rank indicator */}
-                <div className="flex items-center gap-1 w-8 sm:w-10 flex-shrink-0">
-                  <svg className="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                  </svg>
-                  <span className="text-base sm:text-lg font-extrabold">{rank}</span>
-                </div>
-
-                {/* Avatar */}
-                <Avatar id={p.player} size="sm" />
-
-                {/* Name */}
-                <span className="flex-1 text-base sm:text-lg font-bold truncate">
-                  {display.firstName}
-                </span>
-
-                {/* Points */}
-                <span className="text-sm sm:text-base font-bold opacity-80 flex-shrink-0">
-                  {p.wins.toLocaleString()}{" "}
-                  <span className="text-xs font-normal">pts.</span>
-                </span>
-              </div>
-            );
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+  
+    return (
+          // bg-white ensures the flex gaps between rows don't show the background decoration
+          <div className="w-full bg-white">
+                <div className="flex flex-col gap-3 sm:gap-4">
+                  {players.map((player, index) => {
+                      const rank = index + 1;
+                      const isTop = rank <= 3;
+                      const rankStyle = isTop ? topRankStyles[rank] : null;
+            
+                      return (
+                                    <div
+                                                    key={player.player}
+                                                    className="flex items-center gap-6 sm:gap-7 px-6 sm:px-10 py-4 sm:py-5 rounded-[16px] sm:rounded-[20px] transition-colors hover:brightness-[0.98]"
+                                                    style={
+                                                                      rankStyle
+                                                                        ? { background: rankStyle.bg, border: `2px solid ${rankStyle.border}` }
+                                                                        : { background: "#f2f2f5", border: "2px solid transparent" }
+                                                    }
+                                                  >
+                                      {/* Rank number */}
+                                                  <div
+                                                                    className="w-10 flex-shrink-0 text-center"
+                                                                    style={{ color: rankStyle ? rankStyle.color : "#737380" }}
+                                                                  >
+                                                                  <span
+                                                                                      className={`font-extrabold italic tabular-nums ${
+                                                                                                            isTop ? "text-2xl sm:text-[28px]" : "text-lg sm:text-xl"
+                                                                                        }`}
+                                                                                    >
+                                                                    {rank}
+                                                                  </span>span>
+                                                  </div>div>
+                                    
+                                      {/* Avatar */}
+                                                  <Avatar id={player.player} userName={player.userName} />
+                                    
+                                      {/* Country flag */}
+                                                  <div className="w-9 sm:w-10 flex-shrink-0 text-center text-[28px] sm:text-[32px] leading-none">
+                                                    {countryFlag(player.country)}
+                                                  </div>div>
+                                    
+                                      {/* Player info */}
+                                                  <div className="flex-1 min-w-0">
+                                                                  <p className="truncate" style={{ color: "#1a1a26" }}>
+                                                                                    <span
+                                                                                                          className={`leading-tight ${
+                                                                                                                                  isTop
+                                                                                                                                    ? "font-bold text-lg sm:text-[22px]"
+                                                                                                                                    : "font-semibold text-base sm:text-[18px]"
+                                                                                                            }`}
+                                                                                                        >
+                                                                                      {player.userName}
+                                                                                      </span>span>
+                                                                  </p>p>
+                                                                  <p
+                                                                                      className="text-[11px] sm:text-xs mt-0.5 font-medium tabular-nums"
+                                                                                      style={{ color: "#a0a0ab" }}
+                                                                                    >
+                                                                    {player.wins}W &ndash; {player.losses}L &middot; {player.matches} played
+                                                                  </p>p>
+                                                  </div>div>
+                                    
+                                      {/* Wins count */}
+                                                  <div
+                                                                    className="w-[80px] sm:w-[90px] flex-shrink-0 text-right"
+                                                                    style={{ color: rankStyle ? rankStyle.color : "#4d4d59" }}
+                                                                  >
+                                                                  <span
+                                                                                      className={`font-extrabold italic tabular-nums ${
+                                                                                                            isTop ? "text-2xl sm:text-[28px]" : "text-xl sm:text-[22px]"
+                                                                                        }`}
+                                                                                    >
+                                                                    {player.wins.toLocaleString()}
+                                                                  </span>span>
+                                                  </div>div>
+                                    </div>div>
+                                  );
           })}
-        </div>
-
-        {/* Remaining players */}
-        <div className="flex flex-col gap-2 sm:gap-2.5">
-          {rest.map((p, i) => {
-            const rank = i + 4;
-            const display = getPlayerDisplay(p.player);
-
-            return (
-              <div
-                key={p.player}
-                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full transition-colors hover:bg-white/5"
-              >
-                {/* Rank indicator */}
-                <div className="flex items-center gap-1 w-8 sm:w-10 flex-shrink-0">
-                  <svg className="w-3.5 h-3.5 text-[var(--green-accent)] opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                  </svg>
-                  <span className="text-base sm:text-lg font-extrabold text-white">{rank}</span>
-                </div>
-
-                {/* Avatar */}
-                <Avatar id={p.player} size="sm" />
-
-                {/* Name */}
-                <span className="flex-1 text-base sm:text-lg font-bold text-white truncate">
-                  {display.firstName}
-                </span>
-
-                {/* Points */}
-                <span className="text-sm sm:text-base text-[var(--text-muted)] font-bold flex-shrink-0">
-                  {p.wins.toLocaleString()}{" "}
-                  <span className="text-xs font-normal">pts.</span>
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
+                </div>div>
+          
+            {/* Refresh button */}
+                <div className="flex justify-center mt-12">
+                        <button
+                                    onClick={() => startTransition(() => router.refresh())}
+                                    disabled={isPending}
+                                    className="flex items-center gap-2.5 text-sm font-bold uppercase tracking-widest cursor-pointer px-7 py-4 rounded-2xl transition-all hover:brightness-95 active:scale-[0.98]"
+                                    style={{
+                                                  color: "#00b1fd",
+                                                  background: "rgba(0,177,253,0.06)",
+                                                  border: "1.5px solid rgba(0,177,253,0.15)",
+                                    }}
+                                  >
+                                  <svg
+                                                className={`w-4 h-4 ${isPending ? "animate-spin" : ""}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth={2.5}
+                                              >
+                                              <path
+                                                              strokeLinecap="round"
+                                                              strokeLinejoin="round"
+                                                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                            />
+                                  </svg>svg>
+                          {isPending ? "Updating..." : "Refresh"}
+                        </button>button>
+                </div>div>
+          </div>div>
+        );
+}</div>
