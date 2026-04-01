@@ -15,7 +15,7 @@ interface Player {
 async function getLeaderboard(): Promise<Player[]> {
     try {
         const res = await fetch(
-            "https://leaderboards-d2dwf8cwhwfuegde.eastus-01.azurewebsites.net/api/GetLeaderboard",
+            `https://leaderboards-d2dwf8cwhwfuegde.eastus-01.azurewebsites.net/api/GetLeaderboard?code=${process.env.AZURE_API_CODE}`,
             { cache: "no-store" }
         );
         if (!res.ok) return [];
