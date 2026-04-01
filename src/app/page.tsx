@@ -13,12 +13,16 @@ interface Player {
 }
 
 async function getLeaderboard(): Promise<Player[]> {
-    const res = await fetch(
-        "https://leaderboards-d2dwf8cwhwfuegde.eastus-01.azurewebsites.net/api/GetLeaderboard",
-        { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error("Failed to fetch leaderboard");
-    return res.json();
+    try {
+        const res = await fetch(
+            "https://leaderboards-d2dwf8cwhwfuegde.eastus-01.azurewebsites.net/api/GetLeaderboard",
+            { cache: "no-store" }
+        );
+        if (!res.ok) return [];
+        return res.json();
+    } catch {
+        return [];
+    }
 }
 
 export default async function Home() {
@@ -151,23 +155,31 @@ export default async function Home() {
                     </div>
                 </div>
 
-                {/* Column headers */}
-                <div className="flex items-center gap-6 sm:gap-7 px-8 sm:px-10 mb-3 sm:mb-4">
-                    <div className="w-10 flex-shrink-0 text-center text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
-                        #
+                {sorted.length === 0 ? (
+                    <div className="text-center py-16 text-gray-400 text-lg">
+                        Leaderboard data is temporarily unavailable. Please try again shortly.
                     </div>
-                    <div className="w-12 sm:w-14 flex-shrink-0" />
-                    <div className="w-9 sm:w-10 flex-shrink-0" />
-                    <div className="flex-1 min-w-0 text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
-                        Player
-                    </div>
-                    <div className="w-[80px] sm:w-[90px] flex-shrink-0 text-right text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
-                        Wins
-                    </div>
-                </div>
+                ) : (
+                    <>
+                        {/* Column headers */}
+                        <div className="flex items-center gap-6 sm:gap-7 px-8 sm:px-10 mb-3 sm:mb-4">
+                            <div className="w-10 flex-shrink-0 text-center text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
+                                #
+                            </div>
+                            <div className="w-12 sm:w-14 flex-shrink-0" />
+                            <div className="w-9 sm:w-10 flex-shrink-0" />
+                            <div className="flex-1 min-w-0 text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
+                                Player
+                            </div>
+                            <div className="w-[80px] sm:w-[90px] flex-shrink-0 text-right text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-gray-400">
+                                Wins
+                            </div>
+                        </div>
 
-                {/* Leaderboard rows */}
-                <Leaderboard players={sorted} />
+                        {/* Leaderboard rows */}
+                        <Leaderboard players={sorted} />
+                    </>
+                )}
             </div>
         </main>
     );
